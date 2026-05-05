@@ -1,9 +1,17 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../db');
+const User = require('./User');
 
-const projectSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String },
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
-}, { timestamps: true });
+const Project = sequelize.define('Project', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: { type: DataTypes.STRING, allowNull: false },
+  description: { type: DataTypes.TEXT }
+});
 
-module.exports = mongoose.model('Project', projectSchema);
+Project.belongsTo(User, { as: 'owner', foreignKey: 'ownerId' });
+
+module.exports = Project;
