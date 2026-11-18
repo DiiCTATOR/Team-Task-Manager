@@ -1,49 +1,99 @@
 # Team Task Manager
 
-A premium full-stack web application designed for team project and task management with role-based access control.
+A full-stack web application designed for team project and task management with role-based access control.
 
-## 🚀 Key Features
-- **Authentication:** Secure Signup/Login using JWT and bcrypt.
-- **Role-Based Access Control (RBAC):** Admin and Member roles. Admins can create projects, assign tasks, edit details, and delete them. Members can view their tasks and update statuses.
-- **Project & Team Management:** Group tasks under specific projects.
-- **Task Tracking:** Dashboard displaying real-time statistics, with overdue task highlighting and status management.
-- **Premium UI:** Glassmorphism design, responsive layouts, dynamic animations, and a modern color palette.
+Built with **HTML/CSS/JS frontend**, **Node.js & Express backend**, and an **embedded SQLite database**. No Docker or external database services required.
 
-## 🛠️ Technology Stack
-- **Frontend:** Vanilla HTML, CSS, JavaScript (Zero-build system for maximum speed)
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB (via Mongoose)
+---
 
-## ⚙️ Local Setup
-1. Open terminal and run `npm install`
-2. Start the server with `npm start`
-3. The server runs on `http://localhost:5000`
+## 🏗️ 3-Tier Architecture
 
-## 🌐 Railway Deployment Instructions
-To submit the live URL for your assignment:
+- **Frontend (`frontend/`)**: Modern responsive UI (HTML5, CSS3 Glassmorphism, Vanilla JS) with task tracking, project creation, role management, and real-time dashboard stats. Served directly by Express.
+- **Backend (`backend/server.js`)**: Express REST API with JWT authentication, password hashing (`bcryptjs`), and Role-Based Access Control (`/api/auth`, `/api/projects`, `/api/tasks`).
+- **Database (`backend/database.sqlite`)**: Embedded **SQLite** database via **Sequelize ORM** that automatically syncs schema without any external database server setup.
 
-1. **Push to GitHub**:
-   - Create a new repository on GitHub.
-   - Run these commands:
-     ```bash
-     git init
-     git add .
-     git commit -m "Initial commit"
-     git branch -M main
-     git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
-     git push -u origin main
-     ```
+---
 
-2. **Deploy on Railway**:
-   - Go to [Railway.app](https://railway.app/).
-   - Click **New Project** -> **Deploy from GitHub repo**.
-   - Select your newly created repository.
-   - Click **Add a Database** -> **MongoDB** to add the database directly to your project.
-   - Go to your application's **Variables** setting on Railway, click **Add Variable**, and add `MONGO_URI`. The value will automatically map to your Railway MongoDB instance if you link them, or you can paste the provided MongoDB connection string.
-   - Railway will automatically detect the `package.json` in the root folder, run `npm install` and `npm start`.
-   - Your frontend and backend are unified, so Railway will expose your live web app URL instantly!
+## ☁️ AWS EC2 Deployment Guide (Step-by-Step)
 
-3. **Submission**:
-   - **Live URL**: The provided `.up.railway.app` URL from Railway.
-   - **GitHub repo**: Your repository link.
-   - **README**: This file.
+Follow these steps to run the application on an AWS EC2 instance without errors.
+
+### Step 1: Configure AWS Security Group (Crucial!)
+Before opening the app in a browser, allow incoming traffic to your EC2 instance:
+1. In the **AWS EC2 Console**, go to **Instances** and select your instance.
+2. Under the **Security** tab, click your **Security Group**.
+3. Click **Edit inbound rules** -> **Add rule**:
+   - **Type**: Custom TCP
+   - **Port range**: `5000` (or `80` if using Nginx reverse proxy)
+   - **Source**: `Anywhere-IPv4` (`0.0.0.0/0`)
+4. Click **Save rules**.
+
+---
+
+### Step 2: Connect to Your EC2 Instance
+Connect from your local terminal via SSH:
+```bash
+ssh -i "your-key.pem" ubuntu@<YOUR-EC2-PUBLIC-IP>
+```
+
+---
+
+### Step 3: Clone & Deploy
+
+#### Option A: One-Command Automated Setup (Recommended)
+```bash
+git clone https://github.com/<YOUR-USERNAME>/Team-Task-Manager.git
+cd Team-Task-Manager
+chmod +x deploy-ec2.sh
+./deploy-ec2.sh
+```
+
+#### Option B: Manual Setup Commands
+```bash
+# 1. Update packages & install Node.js 20
+sudo apt-get update -y
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs build-essential git
+
+# 2. Clone repository & install dependencies
+git clone https://github.com/<YOUR-USERNAME>/Team-Task-Manager.git
+cd Team-Task-Manager
+npm install
+
+# 3. Install PM2 process manager (keeps app running 24/7)
+sudo npm install -g pm2
+
+# 4. Start the application
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup
+```
+
+---
+
+### Step 4: Access Your Application
+Open your browser and navigate to:
+```
+http://<YOUR-EC2-PUBLIC-IP>:5000
+```
+
+---
+
+## 🛠️ Managing the App on EC2
+
+| Command | Description |
+| :--- | :--- |
+| `pm2 status` | View server status and uptime |
+| `pm2 logs team-task-manager` | View live server output and error logs |
+| `pm2 restart team-task-manager` | Restart the application |
+| `pm2 stop team-task-manager` | Stop the application |
+
+---
+
+## 💻 Running Locally (Development)
+
+```bash
+npm install
+npm start
+```
+App runs at: `http://localhost:5000`
